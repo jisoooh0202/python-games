@@ -20,10 +20,10 @@ def main():
     print("Objective: Shoot down enemy ships and avoid collisions!")
     print("You lose health when enemies hit you.")
     print()
-    
+
     game = SpaceCombatGame()
     game.run()
-    
+
     print("Thanks for playing Space Combat!")
 
 

@@ -8,7 +8,7 @@ def check_collision(rect1, rect2):
 
 def check_bullet_enemy_collisions(bullets, enemies):
     """Check collisions between bullets and enemies.
-    
+
     Returns:
         List of (bullet_index, enemy_index) tuples for collisions
     """
@@ -22,7 +22,7 @@ def check_bullet_enemy_collisions(bullets, enemies):
 
 def check_player_enemy_collisions(player, enemies):
     """Check collisions between player and enemies.
-    
+
     Returns:
         List of enemy indices that collided with player
     """

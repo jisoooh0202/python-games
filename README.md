@@ -5,6 +5,7 @@ A collection of classic games implemented in Python using Pygame.
 ## Available Games
 
 ### Snake Game
+
 - Classic snake gameplay
 - Score tracking
 - Game over and restart functionality
@@ -12,6 +13,7 @@ A collection of classic games implemented in Python using Pygame.
 - Visual feedback with different colors for snake head and body
 
 ### Space Combat Game
+
 - Classic arcade-style space shooter
 - Player health system
 - Enemy spawning and shooting mechanics
@@ -19,6 +21,7 @@ A collection of classic games implemented in Python using Pygame.
 - Score tracking and progressive difficulty
 
 ### Coming Soon
+
 - Tetris
 
 ## Requirements
@@ -39,23 +42,27 @@ uv sync
 ## How to Play
 
 ### Snake Game
+
 ```bash
 # Run the Snake game
 uv run play_snake.py
 ```
 
 **Controls:**
+
 - Arrow keys: Move snake
 - ESC: Quit game
 - SPACE: Restart (when game over)
 
 ### Space Combat Game
+
 ```bash
 # Run the Space Combat game
 uv run play_space_combat.py
 ```
 
 **Controls:**
+
 - WASD or Arrow keys: Move spaceship
 - SPACE: Shoot
 - ESC: Quit game

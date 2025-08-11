@@ -16,10 +16,10 @@ def main():
     print("  - ESC: Quit game")
     print("  - SPACE: Restart (when game over)")
     print()
-    
+
     game = SnakeGame()
     game.run()
-    
+
     print("Thanks for playing Snake!")
 
 
