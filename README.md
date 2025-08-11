@@ -1,23 +1,47 @@
-# Snake Game
+# Python Games Collection
 
-A classic Snake game implemented in Python using Pygame.
+A collection of classic games implemented in Python using Pygame.
 
-## Features
+## Available Games
 
+### Snake Game
 - Classic snake gameplay
 - Score tracking
 - Game over and restart functionality
 - Smooth controls with arrow keys
 - Visual feedback with different colors for snake head and body
 
+### Coming Soon
+- Tetris
+- Space Combat Game
+
 ## Requirements
 
 - Python 3.11+
 - Pygame
+- uv (for dependency management)
 
 ## Installation
 
 This project uses `uv` for dependency management. Make sure you have `uv` installed.
+
+```bash
+# Install dependencies
+uv sync
+```
+
+## How to Play
+
+### Snake Game
+```bash
+# Run the Snake game
+uv run play_snake.py
+```
+
+**Controls:**
+- Arrow keys: Move snake
+- ESC: Quit game
+- SPACE: Restart (when game over)
 
 1. Create a virtual environment:
 

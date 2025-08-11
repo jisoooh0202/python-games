@@ -1,9 +1,12 @@
 [project]
-name = "snake-game"
+name = "python-games"
 version = "0.1.0"
-description = "Add your description here"
+description = "Collection of classic games implemented in Python with Pygame"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pygame>=2.6.1",
 ]
+
+[project.scripts]
+snake = "play_snake:main"
