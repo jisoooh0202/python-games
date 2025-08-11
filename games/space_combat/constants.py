@@ -1,0 +1,33 @@
+"""Constants specific to the Space Combat game."""
+
+from shared.constants import BLACK, WHITE, RED, YELLOW, CYAN
+
+# Window settings
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+
+# Game settings
+FPS = 60
+PLAYER_SPEED = 5
+BULLET_SPEED = 7
+ENEMY_SPEED = 2
+ENEMY_SPAWN_RATE = 60  # frames between enemy spawns
+
+# Entity sizes
+PLAYER_WIDTH = 40
+PLAYER_HEIGHT = 30
+BULLET_WIDTH = 4
+BULLET_HEIGHT = 10
+ENEMY_WIDTH = 30
+ENEMY_HEIGHT = 20
+
+# Colors
+BACKGROUND_COLOR = BLACK
+PLAYER_COLOR = CYAN
+BULLET_COLOR = YELLOW
+ENEMY_COLOR = RED
+TEXT_COLOR = WHITE
+EXPLOSION_COLOR = RED
+
+# Scoring
+ENEMY_KILL_POINTS = 10

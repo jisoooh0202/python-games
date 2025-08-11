@@ -10,3 +10,4 @@ dependencies = [
 
 [project.scripts]
 snake = "play_snake:main"
+space-combat = "play_space_combat:main"

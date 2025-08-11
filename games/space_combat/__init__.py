@@ -1,0 +1,1 @@
+"""Space Combat game implementation."""

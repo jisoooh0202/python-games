@@ -11,9 +11,15 @@ A collection of classic games implemented in Python using Pygame.
 - Smooth controls with arrow keys
 - Visual feedback with different colors for snake head and body
 
+### Space Combat Game
+- Classic arcade-style space shooter
+- Player health system
+- Enemy spawning and shooting mechanics
+- Explosion effects
+- Score tracking and progressive difficulty
+
 ### Coming Soon
 - Tetris
-- Space Combat Game
 
 ## Requirements
 
@@ -42,6 +48,20 @@ uv run play_snake.py
 - Arrow keys: Move snake
 - ESC: Quit game
 - SPACE: Restart (when game over)
+
+### Space Combat Game
+```bash
+# Run the Space Combat game
+uv run play_space_combat.py
+```
+
+**Controls:**
+- WASD or Arrow keys: Move spaceship
+- SPACE: Shoot
+- ESC: Quit game
+- SPACE: Restart (when game over)
+
+**Objective:** Shoot down enemy ships and avoid collisions! You lose health when enemies hit you.
 
 1. Create a virtual environment:
 
