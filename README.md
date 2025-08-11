@@ -20,6 +20,15 @@ A collection of classic games implemented in Python using Pygame.
 - Explosion effects
 - Score tracking and progressive difficulty
 
+### Pong Game
+
+- Classic two-paddle pong gameplay
+- Single player vs AI or two-player modes
+- Player selection menu
+- Physics-based ball bouncing with angle variation
+- Pause functionality
+- First to 5 points wins
+
 ### Coming Soon
 
 - Tetris
@@ -69,6 +78,33 @@ uv run play_space_combat.py
 - SPACE: Restart (when game over)
 
 **Objective:** Shoot down enemy ships and avoid collisions! You lose health when enemies hit you.
+
+### Pong Game
+
+```bash
+# Run the Pong game
+uv run play_pong.py
+```
+
+**Controls:**
+
+**Menu:**
+- 1: Single Player (vs AI)
+- 2: Two Players
+- ESC: Quit
+
+**Single Player:**
+- W/S: Move paddle
+- P: Pause/Unpause
+- ESC: Return to menu
+
+**Two Player:**
+- Player 1: W/S keys
+- Player 2: ↑/↓ arrow keys
+- P: Pause/Unpause
+- ESC: Return to menu
+
+**Objective:** First player to score 5 points wins! The ball bounces off paddles and changes angle based on where it hits.
 
 1. Create a virtual environment:
 
