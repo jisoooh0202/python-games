@@ -29,11 +29,11 @@ class PongGame(BaseGame):
         self.score_font = pygame.font.Font(None, SCORE_FONT_SIZE)
         self.menu_font = pygame.font.Font(None, MENU_FONT_SIZE)
         self.instruction_font = pygame.font.Font(None, INSTRUCTION_FONT_SIZE)
-        
+
         # Game modes
         self.game_state = "menu"  # "menu", "playing", "game_over"
         self.two_player_mode = False
-        
+
         self.reset_game()
 
     def reset_game(self):
@@ -77,13 +77,13 @@ class PongGame(BaseGame):
                         self.reset_game()
                     elif event.key == pygame.K_ESCAPE:
                         return False
-                        
+
                 elif self.game_state == "game_over":
                     if event.key == pygame.K_SPACE:
                         self.game_state = "menu"
                     elif event.key == pygame.K_ESCAPE:
                         return False
-                        
+
                 elif self.game_state == "playing":
                     if event.key == pygame.K_ESCAPE:
                         self.game_state = "menu"
@@ -165,19 +165,19 @@ class PongGame(BaseGame):
             title_text = self.menu_font.render("PONG", True, TEXT_COLOR)
             title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
             self.screen.blit(title_text, title_rect)
-            
+
             select_text = self.instruction_font.render("Select Number of Players:", True, TEXT_COLOR)
             select_rect = select_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50))
             self.screen.blit(select_text, select_rect)
-            
+
             player1_text = self.instruction_font.render("Press 1 for Single Player (vs AI)", True, TEXT_COLOR)
             player1_rect = player1_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(player1_text, player1_rect)
-            
+
             player2_text = self.instruction_font.render("Press 2 for Two Players", True, TEXT_COLOR)
             player2_rect = player2_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
             self.screen.blit(player2_text, player2_rect)
-            
+
             quit_text = self.instruction_font.render("Press ESC to Quit", True, TEXT_COLOR)
             quit_rect = quit_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80))
             self.screen.blit(quit_text, quit_rect)
@@ -214,7 +214,7 @@ class PongGame(BaseGame):
                 controls_text = self.instruction_font.render("P1: W/S, P2: ↑/↓, P: Pause, ESC: Menu", True, TEXT_COLOR)
             else:
                 controls_text = self.instruction_font.render("W/S: Move Paddle, P: Pause, ESC: Menu", True, TEXT_COLOR)
-            
+
             controls_rect = controls_text.get_rect()
             controls_rect.centerx = WINDOW_WIDTH // 2
             controls_rect.y = WINDOW_HEIGHT - 30
@@ -229,7 +229,7 @@ class PongGame(BaseGame):
         elif self.game_state == "game_over":
             # Draw net
             self.draw_net()
-            
+
             # Game over screen
             winner_text = self.menu_font.render(f"{self.winner} Wins!", True, TEXT_COLOR)
             score_text = self.instruction_font.render(

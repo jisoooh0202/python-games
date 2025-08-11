@@ -24,16 +24,16 @@ def main():
     print()
     print("  Two Player:")
     print("    - Player 1: W/S keys")
-    print("    - Player 2: ↑/↓ arrow keys") 
+    print("    - Player 2: ↑/↓ arrow keys")
     print("    - P: Pause/Unpause")
     print("    - ESC: Return to menu")
     print()
     print("Objective: First player to score 5 points wins!")
     print()
-    
+
     game = PongGame()
     game.run()
-    
+
     print("Thanks for playing Pong!")
 
 

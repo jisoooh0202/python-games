@@ -89,16 +89,19 @@ uv run play_pong.py
 **Controls:**
 
 **Menu:**
+
 - 1: Single Player (vs AI)
 - 2: Two Players
 - ESC: Quit
 
 **Single Player:**
+
 - W/S: Move paddle
 - P: Pause/Unpause
 - ESC: Return to menu
 
 **Two Player:**
+
 - Player 1: W/S keys
 - Player 2: ↑/↓ arrow keys
 - P: Pause/Unpause
