@@ -3,8 +3,10 @@
 from shared.constants import BLACK, WHITE, GREEN, RED, YELLOW, CYAN
 
 # Window settings
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 1920   # Default width (will be overridden by actual screen size)
+WINDOW_HEIGHT = 1080  # Default height (will be overridden by actual screen size)
+FULLSCREEN = False    # Use windowed fullscreen instead of true fullscreen
+MAXIMIZE_WINDOW = False # Start with normal resizable window
 
 # Game settings
 FPS = 60
@@ -22,10 +24,38 @@ SPEED_INCREASE_PER_LEVEL = 0.1
 BASE_SPAWN_RATE = 120  # 2 seconds at 60 FPS
 MIN_SPAWN_RATE = 30  # Fastest spawn rate
 
-# Word settings
-WORD_FONT_SIZE = 32
-UI_FONT_SIZE = 24
-TITLE_FONT_SIZE = 48
+# Word settings - System font sizes
+def get_system_font_sizes():
+    """Get appropriate font sizes based on system defaults."""
+    import pygame
+    pygame.init()
+    
+    # Get system default font
+    default_font = pygame.font.Font(None, 0)  # Size 0 gets system default
+    
+    # Base size from system (typically around 11-12pt)
+    base_size = 16  # Default fallback
+    
+    try:
+        # Try to get a reasonable base size
+        test_surface = default_font.render("Test", True, (255, 255, 255))
+        if test_surface.get_height() > 0:
+            # Scale based on actual rendered height
+            base_size = max(14, test_surface.get_height() + 2)
+    except Exception:
+        base_size = 16
+    
+    return {
+        'word': int(base_size * 1.8),      # Main game text - larger for readability
+        'ui': int(base_size * 1.1),        # UI elements - slightly larger than base
+        'title': int(base_size * 2.5)      # Titles - much larger
+    }
+
+# Get system-appropriate font sizes
+_font_sizes = get_system_font_sizes()
+WORD_FONT_SIZE = _font_sizes['word']
+UI_FONT_SIZE = _font_sizes['ui'] 
+TITLE_FONT_SIZE = _font_sizes['title']
 
 # Colors
 BACKGROUND_COLOR = BLACK

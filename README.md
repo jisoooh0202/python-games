@@ -129,6 +129,8 @@ uv run play_typing.py
 
 - Type letters/words as they fall
 - Backspace: Clear current input
+- F11: Cycle window mode (Windowed → Maximized → Fullscreen)
+- Drag window edges: Resize window
 - ESC: Quit game
 - SPACE: Restart (when game over)
 
