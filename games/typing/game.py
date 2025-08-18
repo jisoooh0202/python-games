@@ -27,13 +27,13 @@ class TypingGame(BaseGame):
         """Initialize the Typing game."""
         # Initialize pygame
         pygame.init()
-        
+
         # Store display mode
         self.is_fullscreen = FULLSCREEN
-        
+
         # Update global constants for window dimensions
         global WINDOW_WIDTH, WINDOW_HEIGHT
-        
+
         if FULLSCREEN:
             # Create true fullscreen display (no title bar)
             info = pygame.display.Info()
@@ -53,14 +53,14 @@ class TypingGame(BaseGame):
                 # Use default smaller window size
                 WINDOW_WIDTH = 800
                 WINDOW_HEIGHT = 600
-            
+
             self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
             pygame.display.set_caption("Typing Rain - Resizable Window")
             self.is_fullscreen = False
-            
+
         self.clock = pygame.time.Clock()
         self.running = True
-        
+
         # Initialize fonts with system default font
         # Try to get system default font, fallback to pygame default
         try:
@@ -109,7 +109,7 @@ class TypingGame(BaseGame):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-                
+
             elif event.type == pygame.VIDEORESIZE:
                 # Handle window resize
                 self.handle_resize(event.w, event.h)
@@ -140,11 +140,11 @@ class TypingGame(BaseGame):
     def handle_resize(self, new_width, new_height):
         """Handle window resize event."""
         global WINDOW_WIDTH, WINDOW_HEIGHT
-        
+
         # Update global window dimensions
         WINDOW_WIDTH = new_width
         WINDOW_HEIGHT = new_height
-        
+
         # No need to recreate the display surface - pygame handles it automatically
         # Just update our internal reference to the current screen surface
         self.screen = pygame.display.get_surface()
@@ -169,7 +169,7 @@ class TypingGame(BaseGame):
     def toggle_fullscreen(self):
         """Toggle between windowed, maximized, and fullscreen modes."""
         global FULLSCREEN, MAXIMIZE_WINDOW, WINDOW_WIDTH, WINDOW_HEIGHT
-        
+
         if not MAXIMIZE_WINDOW and not FULLSCREEN:
             # Currently windowed -> switch to maximized
             MAXIMIZE_WINDOW = True
@@ -248,7 +248,11 @@ class TypingGame(BaseGame):
         self.screen.blit(words_text, (10, 130))
 
         # Draw controls
-        controls_text = self.ui_font.render("Type the falling words! ESC: Quit, Backspace: Clear, F11: Cycle Window Mode, Drag to Resize", True, UI_COLOR)
+        controls_text = self.ui_font.render(
+            "Type the falling words! ESC: Quit, Backspace: Clear, F11: Cycle Window Mode, Drag to Resize",
+            True,
+            UI_COLOR,
+        )
         self.screen.blit(controls_text, (10, WINDOW_HEIGHT - 30))
 
         # Draw level progress
