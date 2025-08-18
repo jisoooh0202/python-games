@@ -29,6 +29,15 @@ A collection of classic games implemented in Python using Pygame.
 - Pause functionality
 - First to 5 points wins
 
+### Typing Rain Game
+
+- Educational typing game with falling words
+- Progressive difficulty from letters to long words
+- 10 levels with increasing speed and complexity
+- Real-time accuracy tracking
+- Lives system and scoring
+- Perfect for improving typing skills
+
 ### Coming Soon
 
 - Tetris
@@ -108,6 +117,22 @@ uv run play_pong.py
 - ESC: Return to menu
 
 **Objective:** First player to score 5 points wins! The ball bounces off paddles and changes angle based on where it hits.
+
+### Typing Rain Game
+
+```bash
+# Run the Typing Rain game
+uv run play_typing.py
+```
+
+**Controls:**
+
+- Type letters/words as they fall
+- Backspace: Clear current input
+- ESC: Quit game
+- SPACE: Restart (when game over)
+
+**Objective:** Type falling words before they reach the bottom! Progress through 10 levels from single letters to complex words. Don't let words fall - you lose a life for each miss!
 
 1. Create a virtual environment:
 
