@@ -160,8 +160,7 @@ class SpaceCombatGame(BaseGame):
 
         if not self.game_over:
             # Draw player
-            player_rect = self.player.get_rect()
-            pygame.draw.rect(self.screen, PLAYER_COLOR, player_rect)
+            self.player.draw(self.screen)
 
             # Draw bullets
             for bullet in self.bullets:
@@ -170,8 +169,7 @@ class SpaceCombatGame(BaseGame):
 
             # Draw enemies
             for enemy in self.enemies:
-                enemy_rect = enemy.get_rect()
-                pygame.draw.rect(self.screen, ENEMY_COLOR, enemy_rect)
+                enemy.draw(self.screen)
 
             # Draw explosions
             for explosion in self.explosions:
