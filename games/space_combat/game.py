@@ -77,7 +77,8 @@ class SpaceCombatGame(BaseGame):
         self.explosions = []
 
         # Game state
-        self.score = 0
+        self.score1 = 0
+        self.score2 = 0
         self.game_over = False
         self.enemy_spawn_timer = 0
         self.shoot_cooldown1 = 0
@@ -198,7 +199,7 @@ class SpaceCombatGame(BaseGame):
                 enemy_kills.add(e_idx)
                 enemy = self.enemies[e_idx]
                 self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
-                self.score += ENEMY_KILL_POINTS
+                self.score1 += ENEMY_KILL_POINTS
 
         bullets2_to_remove = set()
         for b_idx, e_idx in check_bullet_enemy_collisions(self.bullets2, self.enemies):
@@ -207,7 +208,7 @@ class SpaceCombatGame(BaseGame):
                 enemy_kills.add(e_idx)
                 enemy = self.enemies[e_idx]
                 self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
-                self.score += ENEMY_KILL_POINTS
+                self.score2 += ENEMY_KILL_POINTS
 
         for b_idx in sorted(bullets1_to_remove, reverse=True):
             if b_idx < len(self.bullets1):
@@ -286,32 +287,42 @@ class SpaceCombatGame(BaseGame):
             for explosion in self.explosions:
                 pygame.draw.circle(self.screen, EXPLOSION_COLOR, (int(explosion.x), int(explosion.y)), explosion.radius)
 
-            # Draw HUD — score centered at top
-            score_text = self.font.render(f"Score: {self.score}", True, TEXT_COLOR)
-            self.screen.blit(score_text, (WINDOW_WIDTH // 2 - score_text.get_width() // 2, 10))
-
-            # P1 HUD (left side)
-            p1_label = self.font.render("P1", True, PLAYER_COLOR)
-            self.screen.blit(p1_label, (10, 35))
+            # Draw HUD
             hp_bar_w, hp_bar_h = 150, 10
-            p1_pct = self.player1.health / self.player1.max_health
-            pygame.draw.rect(self.screen, (80, 80, 80), (10, 58, hp_bar_w, hp_bar_h))
-            p1_hp_color = (0, 255, 0) if p1_pct > 0.5 else (255, 255, 0) if p1_pct > 0.25 else (255, 60, 60)
-            pygame.draw.rect(self.screen, p1_hp_color, (10, 58, int(hp_bar_w * p1_pct), hp_bar_h))
-            if self.player1.health <= 0:
-                self.screen.blit(self.font.render("DEAD", True, (255, 80, 80)), (10, 72))
 
-            # P2 HUD (right side, only in 2-player mode)
+            if self.num_players == 1:
+                # Centered score
+                score_text = self.font.render(f"Score: {self.score1}", True, TEXT_COLOR)
+                self.screen.blit(score_text, (WINDOW_WIDTH // 2 - score_text.get_width() // 2, 10))
+                # P1 health bar (left)
+                p1_label = self.font.render("HP", True, PLAYER_COLOR)
+                self.screen.blit(p1_label, (10, 35))
+            else:
+                # P1 score + label (left)
+                p1_label = self.font.render(f"P1  {self.score1} pts", True, PLAYER_COLOR)
+                self.screen.blit(p1_label, (10, 10))
+                # P2 score + label (right)
+                p2_hud_x = WINDOW_WIDTH - 160
+                p2_label = self.font.render(f"P2  {self.score2} pts", True, PLAYER2_COLOR)
+                self.screen.blit(p2_label, (p2_hud_x, 10))
+
+            # P1 health bar
+            p1_pct = self.player1.health / self.player1.max_health
+            pygame.draw.rect(self.screen, (80, 80, 80), (10, 35, hp_bar_w, hp_bar_h))
+            p1_hp_color = (0, 255, 0) if p1_pct > 0.5 else (255, 255, 0) if p1_pct > 0.25 else (255, 60, 60)
+            pygame.draw.rect(self.screen, p1_hp_color, (10, 35, int(hp_bar_w * p1_pct), hp_bar_h))
+            if self.player1.health <= 0:
+                self.screen.blit(self.font.render("DEAD", True, (255, 80, 80)), (10, 49))
+
+            # P2 health bar (2-player mode only)
             if self.player2 is not None:
                 p2_hud_x = WINDOW_WIDTH - 160
-                p2_label = self.font.render("P2", True, PLAYER2_COLOR)
-                self.screen.blit(p2_label, (p2_hud_x, 35))
                 p2_pct = self.player2.health / self.player2.max_health
-                pygame.draw.rect(self.screen, (80, 80, 80), (p2_hud_x, 58, hp_bar_w, hp_bar_h))
+                pygame.draw.rect(self.screen, (80, 80, 80), (p2_hud_x, 35, hp_bar_w, hp_bar_h))
                 p2_hp_color = (0, 255, 0) if p2_pct > 0.5 else (255, 255, 0) if p2_pct > 0.25 else (255, 60, 60)
-                pygame.draw.rect(self.screen, p2_hp_color, (p2_hud_x, 58, int(hp_bar_w * p2_pct), hp_bar_h))
+                pygame.draw.rect(self.screen, p2_hp_color, (p2_hud_x, 35, int(hp_bar_w * p2_pct), hp_bar_h))
                 if self.player2.health <= 0:
-                    self.screen.blit(self.font.render("DEAD", True, (255, 80, 80)), (p2_hud_x, 72))
+                    self.screen.blit(self.font.render("DEAD", True, (255, 80, 80)), (p2_hud_x, 49))
 
             # Draw controls
             if self.num_players == 2:
@@ -324,7 +335,19 @@ class SpaceCombatGame(BaseGame):
         else:
             # Game over screen
             game_over_text = self.large_font.render("GAME OVER", True, EXPLOSION_COLOR)
-            score_text = self.font.render(f"Final Score: {self.score}", True, TEXT_COLOR)
+            if self.num_players == 2:
+                if self.score1 > self.score2:
+                    result = f"P1 Wins!  ({self.score1} vs {self.score2})"
+                    result_color = PLAYER_COLOR
+                elif self.score2 > self.score1:
+                    result = f"P2 Wins!  ({self.score2} vs {self.score1})"
+                    result_color = PLAYER2_COLOR
+                else:
+                    result = f"Tie!  ({self.score1} pts each)"
+                    result_color = TEXT_COLOR
+                score_text = self.font.render(result, True, result_color)
+            else:
+                score_text = self.font.render(f"Final Score: {self.score1}", True, TEXT_COLOR)
             restart_text = self.font.render("SPACE: menu  |  Shift+R: replay  |  ESC: quit", True, TEXT_COLOR)
 
             # Center the text
