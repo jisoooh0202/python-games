@@ -7,11 +7,15 @@ from .constants import (
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
     FPS,
+    PLAYER_WIDTH,
     ENEMY_SPAWN_RATE,
     BACKGROUND_COLOR,
     PLAYER_COLOR,
+    PLAYER_OUTLINE_COLOR,
+    PLAYER2_COLOR,
+    PLAYER2_OUTLINE_COLOR,
     BULLET_COLOR,
-    ENEMY_COLOR,
+    PLAYER2_BULLET_COLOR,
     TEXT_COLOR,
     EXPLOSION_COLOR,
     ENEMY_KILL_POINTS,
@@ -28,17 +32,38 @@ class SpaceCombatGame(BaseGame):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, "Space Combat")
         self.font = pygame.font.Font(None, MEDIUM_FONT)
         self.large_font = pygame.font.Font(None, LARGE_FONT)
-        self.reset_game()
+        self.num_players = 1
+        self.selecting = True  # show player-select screen first
+        self.reset_game(self.num_players)
 
-    def reset_game(self):
+    def reset_game(self, num_players=None):
         """Reset the game to initial state."""
-        # Initialize player at bottom center
-        player_x = WINDOW_WIDTH // 2 - 20
+        if num_players is not None:
+            self.num_players = num_players
+
         player_y = WINDOW_HEIGHT - 50
-        self.player = Player(player_x, player_y)
+        p1_x = WINDOW_WIDTH // 2 - PLAYER_WIDTH // 2 if self.num_players == 1 else WINDOW_WIDTH // 4 - PLAYER_WIDTH // 2
+        self.player1 = Player(
+            p1_x,
+            player_y,
+            body_color=PLAYER_COLOR,
+            outline_color=PLAYER_OUTLINE_COLOR,
+            bullet_color=BULLET_COLOR,
+        )
+        if self.num_players == 2:
+            self.player2 = Player(
+                3 * WINDOW_WIDTH // 4 - PLAYER_WIDTH // 2,
+                player_y,
+                body_color=PLAYER2_COLOR,
+                outline_color=PLAYER2_OUTLINE_COLOR,
+                bullet_color=PLAYER2_BULLET_COLOR,
+            )
+        else:
+            self.player2 = None
 
         # Initialize game objects
-        self.bullets = []
+        self.bullets1 = []
+        self.bullets2 = []
         self.enemies = []
         self.explosions = []
 
@@ -46,7 +71,8 @@ class SpaceCombatGame(BaseGame):
         self.score = 0
         self.game_over = False
         self.enemy_spawn_timer = 0
-        self.shoot_cooldown = 0
+        self.shoot_cooldown1 = 0
+        self.shoot_cooldown2 = 0
 
     def handle_input(self):
         """Handle input events."""
@@ -57,39 +83,70 @@ class SpaceCombatGame(BaseGame):
                 return False
 
             if event.type == pygame.KEYDOWN:
-                if self.game_over:
+                if self.selecting:
+                    if event.key == pygame.K_1:
+                        self.selecting = False
+                        self.reset_game(1)
+                    elif event.key == pygame.K_2:
+                        self.selecting = False
+                        self.reset_game(2)
+                    elif event.key == pygame.K_ESCAPE:
+                        return False
+                elif self.game_over:
                     if event.key == pygame.K_SPACE:
+                        self.selecting = True
+                    elif event.key == pygame.K_r and (pygame.key.get_mods() & pygame.KMOD_SHIFT):
                         self.reset_game()
+                        self.game_over = False
                     elif event.key == pygame.K_ESCAPE:
                         return False
                 else:
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_r and (pygame.key.get_mods() & pygame.KMOD_SHIFT):
+                        self.selecting = True
+                    elif event.key == pygame.K_ESCAPE:
                         return False
 
         # Handle continuous input during gameplay
-        if not self.game_over:
-            if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-                self.player.move_left()
-            if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-                self.player.move_right()
-            if keys[pygame.K_UP] or keys[pygame.K_w]:
-                self.player.move_up()
-            if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-                self.player.move_down()
-            if keys[pygame.K_SPACE] and self.shoot_cooldown <= 0:
-                self.bullets.append(self.player.shoot())
-                self.shoot_cooldown = 10  # Prevent rapid fire
+        if not self.selecting and not self.game_over:
+            # Player 1: WASD + LCtrl
+            if self.player1.health > 0:
+                if keys[pygame.K_a]:
+                    self.player1.move_left()
+                if keys[pygame.K_d]:
+                    self.player1.move_right()
+                if keys[pygame.K_w]:
+                    self.player1.move_up()
+                if keys[pygame.K_s]:
+                    self.player1.move_down()
+                if keys[pygame.K_LCTRL] and self.shoot_cooldown1 <= 0:
+                    self.bullets1.append(self.player1.shoot())
+                    self.shoot_cooldown1 = 10
+            # Player 2: Arrow keys + Right Ctrl
+            if self.player2 is not None and self.player2.health > 0:
+                if keys[pygame.K_LEFT]:
+                    self.player2.move_left()
+                if keys[pygame.K_RIGHT]:
+                    self.player2.move_right()
+                if keys[pygame.K_UP]:
+                    self.player2.move_up()
+                if keys[pygame.K_DOWN]:
+                    self.player2.move_down()
+                if keys[pygame.K_RCTRL] and self.shoot_cooldown2 <= 0:
+                    self.bullets2.append(self.player2.shoot())
+                    self.shoot_cooldown2 = 10
 
         return True
 
     def update(self):
         """Update game state."""
-        if self.game_over:
+        if self.selecting or self.game_over:
             return
 
         # Update cooldowns
-        if self.shoot_cooldown > 0:
-            self.shoot_cooldown -= 1
+        if self.shoot_cooldown1 > 0:
+            self.shoot_cooldown1 -= 1
+        if self.shoot_cooldown2 > 0:
+            self.shoot_cooldown2 -= 1
 
         # Spawn enemies
         self.enemy_spawn_timer += 1
@@ -98,10 +155,14 @@ class SpaceCombatGame(BaseGame):
             self.enemy_spawn_timer = 0
 
         # Update bullets
-        for bullet in self.bullets[:]:
+        for bullet in self.bullets1[:]:
             bullet.update()
             if bullet.is_off_screen():
-                self.bullets.remove(bullet)
+                self.bullets1.remove(bullet)
+        for bullet in self.bullets2[:]:
+            bullet.update()
+            if bullet.is_off_screen():
+                self.bullets2.remove(bullet)
 
         # Update enemies
         for enemy in self.enemies[:]:
@@ -115,57 +176,91 @@ class SpaceCombatGame(BaseGame):
             if explosion.is_finished():
                 self.explosions.remove(explosion)
 
-        # Check bullet-enemy collisions
-        bullet_enemy_collisions = check_bullet_enemy_collisions(self.bullets, self.enemies)
+        # Check bullet-enemy collisions (P1 first, P2 avoids double-scoring same enemy)
+        enemy_kills = set()
 
-        # Remove collided bullets and enemies, add explosions and score
-        bullets_to_remove = set()
-        enemies_to_remove = set()
+        bullets1_to_remove = set()
+        for b_idx, e_idx in check_bullet_enemy_collisions(self.bullets1, self.enemies):
+            bullets1_to_remove.add(b_idx)
+            if e_idx not in enemy_kills:
+                enemy_kills.add(e_idx)
+                enemy = self.enemies[e_idx]
+                self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
+                self.score += ENEMY_KILL_POINTS
 
-        for bullet_idx, enemy_idx in bullet_enemy_collisions:
-            bullets_to_remove.add(bullet_idx)
-            enemies_to_remove.add(enemy_idx)
+        bullets2_to_remove = set()
+        for b_idx, e_idx in check_bullet_enemy_collisions(self.bullets2, self.enemies):
+            bullets2_to_remove.add(b_idx)
+            if e_idx not in enemy_kills:
+                enemy_kills.add(e_idx)
+                enemy = self.enemies[e_idx]
+                self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
+                self.score += ENEMY_KILL_POINTS
 
-            # Add explosion at enemy position
-            enemy = self.enemies[enemy_idx]
-            self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
+        for b_idx in sorted(bullets1_to_remove, reverse=True):
+            if b_idx < len(self.bullets1):
+                self.bullets1.pop(b_idx)
+        for b_idx in sorted(bullets2_to_remove, reverse=True):
+            if b_idx < len(self.bullets2):
+                self.bullets2.pop(b_idx)
+        for e_idx in sorted(enemy_kills, reverse=True):
+            if e_idx < len(self.enemies):
+                self.enemies.pop(e_idx)
 
-            # Add score
-            self.score += ENEMY_KILL_POINTS
+        # Check player-enemy collisions (only for living players)
+        if self.player1.health > 0:
+            for e_idx in sorted(check_player_enemy_collisions(self.player1, self.enemies), reverse=True):
+                enemy = self.enemies[e_idx]
+                self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
+                self.enemies.pop(e_idx)
+                self.player1.take_damage()
 
-        # Remove collided objects (in reverse order to maintain indices)
-        for bullet_idx in sorted(bullets_to_remove, reverse=True):
-            if bullet_idx < len(self.bullets):
-                self.bullets.pop(bullet_idx)
-        for enemy_idx in sorted(enemies_to_remove, reverse=True):
-            if enemy_idx < len(self.enemies):
-                self.enemies.pop(enemy_idx)
+        if self.player2 is not None and self.player2.health > 0:
+            for e_idx in sorted(check_player_enemy_collisions(self.player2, self.enemies), reverse=True):
+                enemy = self.enemies[e_idx]
+                self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
+                self.enemies.pop(e_idx)
+                self.player2.take_damage()
 
-        # Check player-enemy collisions
-        player_enemy_collisions = check_player_enemy_collisions(self.player, self.enemies)
+        # Game over when all active players are dead
+        p2_dead = self.player2 is None or self.player2.health <= 0
+        if self.player1.health <= 0 and p2_dead:
+            self.game_over = True
 
-        # Handle player damage
-        for enemy_idx in sorted(player_enemy_collisions, reverse=True):
-            enemy = self.enemies[enemy_idx]
-            self.explosions.append(Explosion(enemy.x + enemy.width // 2, enemy.y + enemy.height // 2))
-            self.enemies.pop(enemy_idx)
-
-            if not self.player.take_damage():
-                self.game_over = True
+    def _draw_select_screen(self):
+        """Draw the player-count selection screen."""
+        self.screen.fill(BACKGROUND_COLOR)
+        title = self.large_font.render("SPACE COMBAT", True, PLAYER_COLOR)
+        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100)))
+        prompt = self.font.render("Select number of players", True, TEXT_COLOR)
+        self.screen.blit(prompt, prompt.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30)))
+        opt1 = self.font.render("Press  1  —  1 Player  (WASD + LCtrl)", True, PLAYER_COLOR)
+        self.screen.blit(opt1, opt1.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20)))
+        opt2 = self.font.render("Press  2  —  2 Players  (P2: Arrows + RCtrl)", True, PLAYER2_COLOR)
+        self.screen.blit(opt2, opt2.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60)))
+        esc = self.font.render("ESC: Quit", True, TEXT_COLOR)
+        self.screen.blit(esc, esc.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 110)))
+        pygame.display.flip()
 
     def draw(self):
         """Draw the game."""
+        if self.selecting:
+            self._draw_select_screen()
+            return
+
         # Clear screen
         self.screen.fill(BACKGROUND_COLOR)
 
         if not self.game_over:
-            # Draw player
-            self.player.draw(self.screen)
+            # Draw players
+            if self.player1.health > 0:
+                self.player1.draw(self.screen)
+            if self.player2 is not None and self.player2.health > 0:
+                self.player2.draw(self.screen)
 
-            # Draw bullets
-            for bullet in self.bullets:
-                bullet_rect = bullet.get_rect()
-                pygame.draw.rect(self.screen, BULLET_COLOR, bullet_rect)
+            # Draw bullets (color stored per bullet)
+            for bullet in self.bullets1 + self.bullets2:
+                pygame.draw.rect(self.screen, bullet.color, bullet.get_rect())
 
             # Draw enemies
             for enemy in self.enemies:
@@ -175,40 +270,46 @@ class SpaceCombatGame(BaseGame):
             for explosion in self.explosions:
                 pygame.draw.circle(self.screen, EXPLOSION_COLOR, (int(explosion.x), int(explosion.y)), explosion.radius)
 
-            # Draw HUD
+            # Draw HUD — score centered at top
             score_text = self.font.render(f"Score: {self.score}", True, TEXT_COLOR)
-            self.screen.blit(score_text, (10, 10))
+            self.screen.blit(score_text, (WINDOW_WIDTH // 2 - score_text.get_width() // 2, 10))
 
-            health_text = self.font.render(f"Health: {self.player.health}", True, TEXT_COLOR)
-            self.screen.blit(health_text, (10, 40))
+            # P1 HUD (left side)
+            p1_label = self.font.render("P1", True, PLAYER_COLOR)
+            self.screen.blit(p1_label, (10, 35))
+            hp_bar_w, hp_bar_h = 150, 10
+            p1_pct = self.player1.health / self.player1.max_health
+            pygame.draw.rect(self.screen, (80, 80, 80), (10, 58, hp_bar_w, hp_bar_h))
+            p1_hp_color = (0, 255, 0) if p1_pct > 0.5 else (255, 255, 0) if p1_pct > 0.25 else (255, 60, 60)
+            pygame.draw.rect(self.screen, p1_hp_color, (10, 58, int(hp_bar_w * p1_pct), hp_bar_h))
+            if self.player1.health <= 0:
+                self.screen.blit(self.font.render("DEAD", True, (255, 80, 80)), (10, 72))
 
-            # Draw health bar
-            health_bar_width = 200
-            health_bar_height = 10
-            health_percentage = self.player.health / self.player.max_health
-            health_bar_fill = int(health_bar_width * health_percentage)
-
-            # Health bar background
-            pygame.draw.rect(self.screen, (100, 100, 100), (10, 70, health_bar_width, health_bar_height))
-            # Health bar fill
-            if health_percentage > 0.5:
-                health_color = (0, 255, 0)  # Green
-            elif health_percentage > 0.25:
-                health_color = (255, 255, 0)  # Yellow
-            else:
-                health_color = (255, 0, 0)  # Red
-
-            pygame.draw.rect(self.screen, health_color, (10, 70, health_bar_fill, health_bar_height))
+            # P2 HUD (right side, only in 2-player mode)
+            if self.player2 is not None:
+                p2_hud_x = WINDOW_WIDTH - 160
+                p2_label = self.font.render("P2", True, PLAYER2_COLOR)
+                self.screen.blit(p2_label, (p2_hud_x, 35))
+                p2_pct = self.player2.health / self.player2.max_health
+                pygame.draw.rect(self.screen, (80, 80, 80), (p2_hud_x, 58, hp_bar_w, hp_bar_h))
+                p2_hp_color = (0, 255, 0) if p2_pct > 0.5 else (255, 255, 0) if p2_pct > 0.25 else (255, 60, 60)
+                pygame.draw.rect(self.screen, p2_hp_color, (p2_hud_x, 58, int(hp_bar_w * p2_pct), hp_bar_h))
+                if self.player2.health <= 0:
+                    self.screen.blit(self.font.render("DEAD", True, (255, 80, 80)), (p2_hud_x, 72))
 
             # Draw controls
-            controls_text = self.font.render("WASD/Arrows: Move, SPACE: Shoot, ESC: Quit", True, TEXT_COLOR)
-            self.screen.blit(controls_text, (10, WINDOW_HEIGHT - 30))
+            if self.num_players == 2:
+                ctrl = "P1: WASD+LCtrl  |  P2: Arrows+RCtrl  |  Shift+R: Restart"
+            else:
+                ctrl = "Move: WASD  |  Shoot: LCtrl  |  Shift+R: Restart  |  ESC: Quit"
+            controls_text = self.font.render(ctrl, True, TEXT_COLOR)
+            self.screen.blit(controls_text, (WINDOW_WIDTH // 2 - controls_text.get_width() // 2, WINDOW_HEIGHT - 30))
 
         else:
             # Game over screen
             game_over_text = self.large_font.render("GAME OVER", True, EXPLOSION_COLOR)
             score_text = self.font.render(f"Final Score: {self.score}", True, TEXT_COLOR)
-            restart_text = self.font.render("Press SPACE to play again, ESC to quit", True, TEXT_COLOR)
+            restart_text = self.font.render("SPACE: menu  |  Shift+R: replay  |  ESC: quit", True, TEXT_COLOR)
 
             # Center the text
             game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50))

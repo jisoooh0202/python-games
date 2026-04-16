@@ -20,7 +20,7 @@ from .constants import (
 class Player:
     """Player spaceship class."""
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, body_color=(0, 210, 230), outline_color=(180, 255, 255), bullet_color=(255, 255, 0)):
         """Initialize player at given position."""
         self.x = x
         self.y = y
@@ -29,6 +29,9 @@ class Player:
         self.speed = PLAYER_SPEED
         self.health = 100
         self.max_health = 100
+        self.body_color = body_color
+        self.outline_color = outline_color
+        self.bullet_color = bullet_color
 
     def move_left(self):
         """Move player left."""
@@ -52,14 +55,14 @@ class Player:
 
     def take_damage(self, damage=20):
         """Take damage and return True if still alive."""
-        self.health -= damage
+        self.health = max(0, self.health - damage)
         return self.health > 0
 
     def shoot(self):
         """Create a bullet at the player's position."""
         bullet_x = self.x + self.width // 2 - BULLET_WIDTH // 2
         bullet_y = self.y
-        return Bullet(bullet_x, bullet_y, -BULLET_SPEED)  # Negative for upward movement
+        return Bullet(bullet_x, bullet_y, -BULLET_SPEED, self.bullet_color)
 
     def draw(self, surface):
         """Draw player as a spaceship pointing upward."""
@@ -76,8 +79,8 @@ class Player:
             (self.x, self.y + self.height),  # left wing tip
             (cx - 7, self.y + 18),  # left shoulder
         ]
-        pygame.draw.polygon(surface, (0, 210, 230), body)
-        pygame.draw.polygon(surface, (180, 255, 255), body, 1)
+        pygame.draw.polygon(surface, self.body_color, body)
+        pygame.draw.polygon(surface, self.outline_color, body, 1)
 
         # Engine exhaust flame
         pygame.draw.rect(surface, (255, 160, 0), (cx - 4, self.y + self.height - 5, 8, 5))
@@ -148,13 +151,14 @@ class Enemy:
 class Bullet:
     """Bullet class for player shots."""
 
-    def __init__(self, x, y, speed):
+    def __init__(self, x, y, speed, color=(255, 255, 0)):
         """Initialize bullet at given position with given speed."""
         self.x = x
         self.y = y
         self.width = BULLET_WIDTH
         self.height = BULLET_HEIGHT
         self.speed = speed
+        self.color = color
 
     def update(self):
         """Update bullet position."""
