@@ -18,10 +18,20 @@ class BaseGame(ABC):
         pygame.init()
         self.window_width = window_width
         self.window_height = window_height
-        self.screen = pygame.display.set_mode((window_width, window_height))
+        self.screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
         pygame.display.set_caption(title)
         self.clock = pygame.time.Clock()
         self.running = True
+
+    def present(self):
+        """Display the current frame."""
+        pygame.display.flip()
+
+    def handle_resize(self, w, h):
+        """Handle window resize. Override to add game-specific updates."""
+        self.window_width = w
+        self.window_height = h
+        self.screen = pygame.display.get_surface()
 
     @abstractmethod
     def handle_input(self):

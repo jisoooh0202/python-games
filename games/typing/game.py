@@ -3,6 +3,7 @@
 import pygame
 import random
 from shared.base_game import BaseGame
+from . import constants as typing_const
 from .constants import (
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
@@ -60,6 +61,8 @@ class TypingGame(BaseGame):
 
         self.clock = pygame.time.Clock()
         self.running = True
+        self.window_width = WINDOW_WIDTH
+        self.window_height = WINDOW_HEIGHT
 
         # Initialize fonts with system default font
         # Try to get system default font, fallback to pygame default
@@ -140,14 +143,11 @@ class TypingGame(BaseGame):
     def handle_resize(self, new_width, new_height):
         """Handle window resize event."""
         global WINDOW_WIDTH, WINDOW_HEIGHT
-
-        # Update global window dimensions
+        super().handle_resize(new_width, new_height)
         WINDOW_WIDTH = new_width
         WINDOW_HEIGHT = new_height
-
-        # No need to recreate the display surface - pygame handles it automatically
-        # Just update our internal reference to the current screen surface
-        self.screen = pygame.display.get_surface()
+        typing_const.WINDOW_WIDTH = new_width
+        typing_const.WINDOW_HEIGHT = new_height
 
     def handle_char_input(self, char):
         """Handle character input for typing."""

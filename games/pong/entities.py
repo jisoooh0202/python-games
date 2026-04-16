@@ -12,6 +12,7 @@ from .constants import (
     BALL_SPEED_X,
     BALL_SPEED_Y,
 )
+from . import constants as _c
 
 
 class Paddle:
@@ -32,7 +33,7 @@ class Paddle:
 
     def move_down(self):
         """Move paddle down."""
-        self.y = min(WINDOW_HEIGHT - self.height, self.y + self.speed)
+        self.y = min(_c.WINDOW_HEIGHT - self.height, self.y + self.speed)
 
     def get_rect(self):
         """Get pygame rect for collision detection."""
@@ -72,8 +73,8 @@ class Ball:
 
     def reset_ball(self):
         """Reset ball to center with random direction."""
-        self.x = WINDOW_WIDTH // 2 - self.size // 2
-        self.y = WINDOW_HEIGHT // 2 - self.size // 2
+        self.x = _c.WINDOW_WIDTH // 2 - self.size // 2
+        self.y = _c.WINDOW_HEIGHT // 2 - self.size // 2
 
         # Random direction
         self.speed_x = BALL_SPEED_X if random.choice([True, False]) else -BALL_SPEED_X
@@ -85,7 +86,7 @@ class Ball:
         self.y += self.speed_y
 
         # Bounce off top and bottom walls
-        if self.y <= 0 or self.y >= WINDOW_HEIGHT - self.size:
+        if self.y <= 0 or self.y >= _c.WINDOW_HEIGHT - self.size:
             self.speed_y = -self.speed_y
 
     def get_rect(self):
@@ -115,4 +116,4 @@ class Ball:
 
     def is_out_of_bounds_right(self):
         """Check if ball went off right side."""
-        return self.x > WINDOW_WIDTH
+        return self.x > _c.WINDOW_WIDTH

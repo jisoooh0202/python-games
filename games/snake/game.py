@@ -14,6 +14,7 @@ from .constants import (
     BACKGROUND_COLOR,
     TEXT_COLOR,
 )
+from . import constants as snake_const
 from .entities import Snake, Food, Direction
 
 
@@ -26,8 +27,18 @@ class SnakeGame(BaseGame):
         self.font = pygame.font.Font(None, MEDIUM_FONT)
         self.reset_game()
 
+    def handle_resize(self, w, h):
+        """Handle window resize, updating snake constants."""
+        super().handle_resize(w, h)
+        snake_const.WINDOW_WIDTH = w
+        snake_const.WINDOW_HEIGHT = h
+        snake_const.GRID_WIDTH = w // GRID_SIZE
+        snake_const.GRID_HEIGHT = h // GRID_SIZE
+
     def reset_game(self):
         """Reset the game to initial state."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         # Initialize snake at center of screen
         center_x = WINDOW_WIDTH // GRID_SIZE // 2
         center_y = WINDOW_HEIGHT // GRID_SIZE // 2
@@ -46,6 +57,9 @@ class SnakeGame(BaseGame):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+
+            if event.type == pygame.VIDEORESIZE:
+                self.handle_resize(event.w, event.h)
 
             if event.type == pygame.KEYDOWN:
                 if self.game_over:
@@ -92,6 +106,8 @@ class SnakeGame(BaseGame):
 
     def draw(self):
         """Draw the game."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         # Clear screen
         self.screen.fill(BACKGROUND_COLOR)
 
@@ -133,7 +149,7 @@ class SnakeGame(BaseGame):
             self.screen.blit(score_text, score_rect)
             self.screen.blit(restart_text, restart_rect)
 
-        pygame.display.flip()
+        self.present()
 
     def run(self):
         """Main game loop with custom timing."""

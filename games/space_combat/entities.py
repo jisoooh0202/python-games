@@ -15,6 +15,7 @@ from .constants import (
     BULLET_SPEED,
     ENEMY_SPEED,
 )
+from . import constants as _c
 
 
 class Player:
@@ -39,7 +40,7 @@ class Player:
 
     def move_right(self):
         """Move player right."""
-        self.x = min(WINDOW_WIDTH - self.width, self.x + self.speed)
+        self.x = min(_c.WINDOW_WIDTH - self.width, self.x + self.speed)
 
     def move_up(self):
         """Move player up."""
@@ -47,7 +48,7 @@ class Player:
 
     def move_down(self):
         """Move player down."""
-        self.y = min(WINDOW_HEIGHT - self.height, self.y + self.speed)
+        self.y = min(_c.WINDOW_HEIGHT - self.height, self.y + self.speed)
 
     def get_rect(self):
         """Get pygame rect for collision detection."""
@@ -108,7 +109,7 @@ class Enemy:
 
     def is_off_screen(self):
         """Check if enemy is off screen."""
-        return self.y > WINDOW_HEIGHT
+        return self.y > _c.WINDOW_HEIGHT
 
     def get_rect(self):
         """Get pygame rect for collision detection."""
@@ -117,7 +118,7 @@ class Enemy:
     @staticmethod
     def spawn_random():
         """Spawn enemy at random x position at top of screen."""
-        x = random.randint(0, WINDOW_WIDTH - ENEMY_WIDTH)
+        x = random.randint(0, _c.WINDOW_WIDTH - ENEMY_WIDTH)
         return Enemy(x, -ENEMY_HEIGHT)
 
     def draw(self, surface):
@@ -166,7 +167,7 @@ class Bullet:
 
     def is_off_screen(self):
         """Check if bullet is off screen."""
-        return self.y < 0 or self.y > WINDOW_HEIGHT
+        return self.y < 0 or self.y > _c.WINDOW_HEIGHT
 
     def get_rect(self):
         """Get pygame rect for collision detection."""

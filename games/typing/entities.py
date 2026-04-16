@@ -1,6 +1,7 @@
 """Typing game entities: FallingWord and GameState."""
 
 import pygame
+from . import constants as _c
 from .constants import (
     WINDOW_HEIGHT,
     WORD_COLOR,
@@ -33,7 +34,7 @@ class FallingWord:
 
     def is_off_screen(self):
         """Check if word has fallen off the bottom of the screen."""
-        return self.y > WINDOW_HEIGHT
+        return self.y > _c.WINDOW_HEIGHT
 
     def type_char(self, char):
         """Try to type a character. Returns True if correct, False if wrong."""

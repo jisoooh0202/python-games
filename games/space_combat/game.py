@@ -20,6 +20,7 @@ from .constants import (
     EXPLOSION_COLOR,
     ENEMY_KILL_POINTS,
 )
+from . import constants as sc_const
 from .entities import Player, Enemy, Explosion
 from .physics import check_bullet_enemy_collisions, check_player_enemy_collisions
 
@@ -36,11 +37,19 @@ class SpaceCombatGame(BaseGame):
         self.selecting = True  # show player-select screen first
         self.reset_game(self.num_players)
 
+    def handle_resize(self, w, h):
+        """Handle window resize, updating space combat constants."""
+        super().handle_resize(w, h)
+        sc_const.WINDOW_WIDTH = w
+        sc_const.WINDOW_HEIGHT = h
+
     def reset_game(self, num_players=None):
         """Reset the game to initial state."""
         if num_players is not None:
             self.num_players = num_players
 
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         player_y = WINDOW_HEIGHT - 50
         p1_x = WINDOW_WIDTH // 2 - PLAYER_WIDTH // 2 if self.num_players == 1 else WINDOW_WIDTH // 4 - PLAYER_WIDTH // 2
         self.player1 = Player(
@@ -81,6 +90,9 @@ class SpaceCombatGame(BaseGame):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+
+            if event.type == pygame.VIDEORESIZE:
+                self.handle_resize(event.w, event.h)
 
             if event.type == pygame.KEYDOWN:
                 if self.selecting:
@@ -229,6 +241,8 @@ class SpaceCombatGame(BaseGame):
 
     def _draw_select_screen(self):
         """Draw the player-count selection screen."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         self.screen.fill(BACKGROUND_COLOR)
         title = self.large_font.render("SPACE COMBAT", True, PLAYER_COLOR)
         self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100)))
@@ -240,10 +254,12 @@ class SpaceCombatGame(BaseGame):
         self.screen.blit(opt2, opt2.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60)))
         esc = self.font.render("ESC: Quit", True, TEXT_COLOR)
         self.screen.blit(esc, esc.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 110)))
-        pygame.display.flip()
+        self.present()
 
     def draw(self):
         """Draw the game."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         if self.selecting:
             self._draw_select_screen()
             return
@@ -320,7 +336,7 @@ class SpaceCombatGame(BaseGame):
             self.screen.blit(score_text, score_rect)
             self.screen.blit(restart_text, restart_rect)
 
-        pygame.display.flip()
+        self.present()
 
     def run(self):
         """Main game loop with custom timing."""

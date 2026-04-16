@@ -2,7 +2,7 @@
 
 import random
 from enum import Enum
-from .constants import GRID_WIDTH, GRID_HEIGHT
+from . import constants as _c
 
 
 class Direction(Enum):
@@ -57,7 +57,7 @@ class Snake:
     def check_wall_collision(self):
         """Check if snake hit a wall."""
         head_x, head_y = self.body[0]
-        return head_x < 0 or head_x >= GRID_WIDTH or head_y < 0 or head_y >= GRID_HEIGHT
+        return head_x < 0 or head_x >= _c.GRID_WIDTH or head_y < 0 or head_y >= _c.GRID_HEIGHT
 
     def check_self_collision(self):
         """Check if snake hit itself."""
@@ -78,8 +78,8 @@ class Food:
 
     def _generate_position(self):
         """Generate a random position for food."""
-        x = random.randint(0, GRID_WIDTH - 1)
-        y = random.randint(0, GRID_HEIGHT - 1)
+        x = random.randint(0, _c.GRID_WIDTH - 1)
+        y = random.randint(0, _c.GRID_HEIGHT - 1)
         return (x, y)
 
     def regenerate(self, snake_body):

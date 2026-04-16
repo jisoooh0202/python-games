@@ -17,6 +17,7 @@ from .constants import (
     MENU_FONT_SIZE,
     INSTRUCTION_FONT_SIZE,
 )
+from . import constants as pong_const
 from .entities import Paddle, Ball
 
 
@@ -36,8 +37,18 @@ class PongGame(BaseGame):
 
         self.reset_game()
 
+    def handle_resize(self, w, h):
+        """Handle window resize, updating pong constants and right paddle position."""
+        super().handle_resize(w, h)
+        pong_const.WINDOW_WIDTH = w
+        pong_const.WINDOW_HEIGHT = h
+        if hasattr(self, "right_paddle"):
+            self.right_paddle.x = w - PADDLE_MARGIN - 15
+
     def reset_game(self):
         """Reset the game to initial state."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         # Initialize paddles
         left_paddle_x = PADDLE_MARGIN
         right_paddle_x = WINDOW_WIDTH - PADDLE_MARGIN - 15  # 15 is paddle width
@@ -64,6 +75,9 @@ class PongGame(BaseGame):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+
+            if event.type == pygame.VIDEORESIZE:
+                self.handle_resize(event.w, event.h)
 
             if event.type == pygame.KEYDOWN:
                 if self.game_state == "menu":
@@ -145,6 +159,8 @@ class PongGame(BaseGame):
 
     def draw_net(self):
         """Draw the center net."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         net_width = 5
         net_height = 15
         net_gap = 15
@@ -157,6 +173,8 @@ class PongGame(BaseGame):
 
     def draw(self):
         """Draw the game."""
+        WINDOW_WIDTH = self.window_width
+        WINDOW_HEIGHT = self.window_height
         # Clear screen
         self.screen.fill(BACKGROUND_COLOR)
 
@@ -246,7 +264,7 @@ class PongGame(BaseGame):
             self.screen.blit(score_text, score_rect)
             self.screen.blit(restart_text, restart_rect)
 
-        pygame.display.flip()
+        self.present()
 
     def run(self):
         """Main game loop with custom timing."""
