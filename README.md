@@ -38,6 +38,14 @@ A collection of classic games implemented in Python using Pygame.
 - Lives system and scoring
 - Perfect for improving typing skills
 
+### ColorPuzzleGame
+
+- Terminal-only color sorting puzzle
+- Keyboard controls for selecting and pouring between tubes
+- Seven levels from easiest to hardest
+- Undo, quick tube selection, and new-puzzle controls
+- Solvable puzzle generation so each board is fair
+
 ### Coming Soon
 
 - Tetris
@@ -135,6 +143,25 @@ uv run play_typing.py
 - SPACE: Restart (when game over)
 
 **Objective:** Type falling words before they reach the bottom! Progress through 10 levels from single letters to complex words. Don't let words fall - you lose a life for each miss!
+
+### ColorPuzzleGame
+
+```bash
+# Run the terminal Color Puzzle game
+uv run play_color_puzzle.py
+```
+
+**Controls:**
+
+- Left/Right arrows or H/L: Move between tubes
+- Enter or Space: Pick a tube, then pour into another tube
+- 1-9: Quick-select tubes
+- U: Undo last move
+- - / +: Change level
+- N: New puzzle
+- Q or ESC: Quit
+
+**Objective:** Sort the colors until every non-empty tube contains one full color. You can only pour onto the same color or into an empty tube.
 
 1. Create a virtual environment:
 
