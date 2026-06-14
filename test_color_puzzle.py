@@ -7,8 +7,9 @@ from games.color_puzzle.model import (
     ColorPuzzleBoard,
     InvalidMove,
     is_solvable,
+    longest_run,
 )
-from games.color_puzzle.game import ColorPuzzleGame
+from games.color_puzzle.game import CURSES_COLORS, ColorPuzzleGame
 
 
 class ColorPuzzleBoardTest(unittest.TestCase):
@@ -54,6 +55,31 @@ class ColorPuzzleBoardTest(unittest.TestCase):
             [difficulty.name for difficulty in DIFFICULTIES],
             ["easiest", "easier", "easy", "normal", "hard", "harder", "hardest"],
         )
+
+    def test_upper_difficulty_color_counts(self):
+        color_counts = {difficulty.name: difficulty.color_count for difficulty in DIFFICULTIES}
+
+        self.assertEqual(color_counts["normal"], 4)
+        self.assertEqual(color_counts["hard"], 5)
+        self.assertEqual(color_counts["harder"], 6)
+        self.assertEqual(color_counts["hardest"], 7)
+
+    def test_orange_uses_different_terminal_color_than_red(self):
+        self.assertNotEqual(CURSES_COLORS["O"], CURSES_COLORS["R"])
+
+    def test_harder_and_hardest_avoid_three_color_runs(self):
+        restricted_levels = [
+            difficulty for difficulty in DIFFICULTIES if difficulty.name in {"harder", "hardest"}
+        ]
+
+        for difficulty in restricted_levels:
+            for seed in range(20):
+                with self.subTest(level=difficulty.name, seed=seed):
+                    board = ColorPuzzleBoard.for_difficulty(difficulty, seed=seed)
+                    self.assertTrue(
+                        all(longest_run(tube) <= 2 for tube in board.tubes),
+                        board.tubes,
+                    )
 
     def test_difficulty_controls_board_size(self):
         difficulty = DIFFICULTIES[0]

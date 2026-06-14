@@ -33,7 +33,7 @@ CURSES_COLORS = {
     "Y": curses.COLOR_YELLOW,
     "M": curses.COLOR_MAGENTA,
     "C": curses.COLOR_CYAN,
-    "O": curses.COLOR_RED,
+    "O": curses.COLOR_WHITE,
     "P": curses.COLOR_MAGENTA,
 }
 

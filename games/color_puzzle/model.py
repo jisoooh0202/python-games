@@ -23,16 +23,17 @@ class Difficulty:
     empty_tubes: int
     solver_limit: int = DEFAULT_SOLVER_LIMIT
     scramble_moves: int = 10
+    max_initial_run: int | None = None
 
 
 DIFFICULTIES = (
     Difficulty("easiest", 2, 3, 20_000, 5),
     Difficulty("easier", 2, 2, 25_000, 7),
     Difficulty("easy", 3, 3, 35_000, 9),
-    Difficulty("normal", 3, 2, 45_000, 11),
-    Difficulty("hard", 4, 4, 60_000, 13),
-    Difficulty("harder", 4, 3, 75_000, 15),
-    Difficulty("hardest", 4, 2, 90_000, 17),
+    Difficulty("normal", 4, 3, 60_000, 12),
+    Difficulty("hard", 5, 3, 90_000, 15),
+    Difficulty("harder", 6, 3, 120_000, 18, 2),
+    Difficulty("hardest", 7, 3, 160_000, 21, 2),
 )
 DEFAULT_DIFFICULTY_INDEX = 3
 
@@ -63,6 +64,7 @@ class ColorPuzzleBoard:
         seed: int | None = None,
         solver_limit: int = DEFAULT_SOLVER_LIMIT,
         scramble_moves: int | None = None,
+        max_initial_run: int | None = None,
     ) -> "ColorPuzzleBoard":
         """Create a randomized, solver-checked board."""
         rng = random.Random(seed)
@@ -73,6 +75,7 @@ class ColorPuzzleBoard:
             rng,
             solver_limit,
             scramble_moves,
+            max_initial_run,
         )
 
     @classmethod
@@ -90,6 +93,7 @@ class ColorPuzzleBoard:
             seed=seed,
             solver_limit=difficulty.solver_limit,
             scramble_moves=difficulty.scramble_moves,
+            max_initial_run=difficulty.max_initial_run,
         )
 
     def snapshot(self) -> tuple[tuple[str, ...], ...]:
@@ -217,6 +221,28 @@ def is_solved_state(state: tuple[tuple[str, ...], ...], capacity: int) -> bool:
     return True
 
 
+def longest_run(tube: tuple[str, ...] | list[str]) -> int:
+    """Return the longest consecutive run in a tube."""
+    best = 0
+    current = 0
+    previous = None
+
+    for color in tube:
+        if color == previous:
+            current += 1
+        else:
+            current = 1
+            previous = color
+        best = max(best, current)
+
+    return best
+
+
+def has_long_initial_run(state: tuple[tuple[str, ...], ...], max_initial_run: int) -> bool:
+    """Return True when a tube has too many matching colors in a row."""
+    return any(longest_run(tube) > max_initial_run for tube in state)
+
+
 def is_solvable(
     state: tuple[tuple[str, ...], ...],
     capacity: int,
@@ -247,6 +273,7 @@ def generate_board(
     rng: random.Random,
     solver_limit: int = DEFAULT_SOLVER_LIMIT,
     scramble_moves: int | None = None,
+    max_initial_run: int | None = None,
 ) -> ColorPuzzleBoard:
     """Generate a solvable puzzle by scattering chunks from a solved board."""
     if color_count < 2:
@@ -261,7 +288,7 @@ def generate_board(
     moves_to_make = scramble_moves or max(6, color_count * 3)
     colors = COLORS[:color_count]
 
-    for _ in range(100):
+    for _ in range(1000):
         tubes = [[color] * capacity for color in colors]
         tubes.extend([] for _ in range(empty_tubes))
         moves_made = 0
@@ -298,7 +325,13 @@ def generate_board(
 
         rng.shuffle(tubes)
         state = tuple(tuple(tube) for tube in tubes)
-        if moves_made >= max(2, moves_to_make // 2) and not is_solved_state(state, capacity):
-            return ColorPuzzleBoard([list(tube) for tube in state], capacity)
+        if moves_made < max(2, moves_to_make // 2):
+            continue
+        if is_solved_state(state, capacity):
+            continue
+        if max_initial_run is not None and has_long_initial_run(state, max_initial_run):
+            continue
+
+        return ColorPuzzleBoard([list(tube) for tube in state], capacity)
 
     raise RuntimeError("Could not generate a solvable Color Puzzle board.")
