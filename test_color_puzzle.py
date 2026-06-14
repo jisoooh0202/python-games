@@ -72,6 +72,17 @@ class ColorPuzzleBoardTest(unittest.TestCase):
         game._handle_key(ord("-"))
         self.assertEqual(game.level_index, starting_level)
 
+    def test_pressing_select_twice_keeps_tube_held(self):
+        game = ColorPuzzleGame(seed=5)
+        game.cursor = next(index for index, tube in enumerate(game.board.tubes) if tube)
+
+        game._handle_key(ord(" "))
+        selected = game.selected
+        game._handle_key(ord(" "))
+
+        self.assertEqual(game.selected, selected)
+        self.assertIn("Still holding", game.message)
+
 
 if __name__ == "__main__":
     unittest.main()

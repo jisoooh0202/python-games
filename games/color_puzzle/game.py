@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import curses
+import random
 import time
 
 from .model import (
@@ -46,6 +47,7 @@ class ColorPuzzleGame:
         self.board = self._new_board()
         self.cursor = 0
         self.selected: int | None = None
+        self.celebrate_pending = False
         self.message = "Select a tube, then choose where to pour."
         self.message_until = 0.0
 
@@ -72,6 +74,9 @@ class ColorPuzzleGame:
             key = stdscr.getch()
             if not self._handle_key(key):
                 break
+            if self.celebrate_pending:
+                self.celebrate_pending = False
+                self._play_fireworks(stdscr)
 
     def _init_colors(self):
         if not curses.has_colors():
@@ -81,6 +86,7 @@ class ColorPuzzleGame:
         for index, color in enumerate(COLORS, start=1):
             curses.init_pair(index, CURSES_COLORS[color], -1)
         curses.init_pair(len(COLORS) + 1, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+        curses.init_pair(len(COLORS) + 2, curses.COLOR_BLACK, curses.COLOR_CYAN)
 
     def _handle_key(self, key: int) -> bool:
         if key in (ord("q"), ord("Q"), 27):
@@ -147,11 +153,16 @@ class ColorPuzzleGame:
                 self._set_message("That tube is empty. Pick a color tube first.")
                 return
             self.selected = self.cursor
-            self._set_message(f"Picked tube {self.cursor + 1}.")
+            self._set_message(f"Holding tube {self.cursor + 1}. Choose where to pour.")
             return
 
         source = self.selected
         target = self.cursor
+
+        if source == target:
+            self._set_message(f"Still holding tube {source + 1}. Move to another tube to pour.")
+            return
+
         self.selected = None
 
         try:
@@ -163,6 +174,7 @@ class ColorPuzzleGame:
         plural = "" if amount == 1 else "s"
         if self.board.is_solved():
             self._set_message(f"Solved in {self.board.moves} moves. Press N for another puzzle.", sticky=True)
+            self.celebrate_pending = True
         else:
             self._set_message(f"Poured {amount} block{plural}.")
 
@@ -188,6 +200,13 @@ class ColorPuzzleGame:
         controls = "Arrows/H-L move  Enter/Space select  1-9 pick  U undo  -/+ level  N new  Q quit"
         stdscr.addstr(2, 2, controls[: width - 4])
 
+        if self.selected is not None:
+            holding = f"HOLDING TUBE {self.selected + 1} -> choose destination"
+            attr = curses.A_BOLD | curses.A_REVERSE
+            if curses.has_colors():
+                attr |= curses.color_pair(len(COLORS) + 2)
+            stdscr.addstr(3, 2, holding[: width - 4], attr)
+
         if self.message_until and time.time() > self.message_until:
             self.message = "Select a tube, then choose where to pour."
             self.message_until = 0.0
@@ -207,21 +226,30 @@ class ColorPuzzleGame:
     def _draw_tube(self, stdscr, y: int, x: int, index: int, tube: list[str]):
         selected = index == self.selected
         focused = index == self.cursor
+        if selected:
+            y -= 1
+
         label_attr = curses.A_NORMAL
         if focused:
             label_attr |= curses.A_BOLD | curses.A_REVERSE
             if curses.has_colors():
                 label_attr |= curses.color_pair(len(COLORS) + 1)
         if selected:
-            label_attr |= curses.A_REVERSE
+            label_attr |= curses.A_BOLD | curses.A_REVERSE
+            if curses.has_colors():
+                label_attr |= curses.color_pair(len(COLORS) + 2)
 
         label = f"[{index + 1}]" if focused else f" {index + 1} "
         stdscr.addstr(y, x + 1, label, label_attr)
 
+        if selected:
+            stdscr.addstr(y + 1, x, "HELD", label_attr)
+
         for row in range(self.board.capacity - 1, -1, -1):
-            block_y = y + 1 + (self.board.capacity - 1 - row)
-            stdscr.addstr(block_y, x, "|")
-            stdscr.addstr(block_y, x + 4, "|")
+            block_y = y + 2 + (self.board.capacity - 1 - row) if selected else y + 1 + (self.board.capacity - 1 - row)
+            side = "!" if selected else "|"
+            stdscr.addstr(block_y, x, side, label_attr if selected else curses.A_NORMAL)
+            stdscr.addstr(block_y, x + 4, side, label_attr if selected else curses.A_NORMAL)
 
             if row < len(tube):
                 color = tube[row]
@@ -233,8 +261,74 @@ class ColorPuzzleGame:
                 stdscr.addstr(block_y, x + 1, "   ", curses.A_DIM)
 
         base_attr = curses.A_BOLD if focused else curses.A_NORMAL
-        stdscr.addstr(y + self.board.capacity + 1, x, "+---+", base_attr)
+        base_y = y + self.board.capacity + 2 if selected else y + self.board.capacity + 1
+        stdscr.addstr(base_y, x, "+---+", base_attr)
 
         if tube:
             name = COLOR_NAMES.get(tube[-1], tube[-1])
-            stdscr.addstr(y + self.board.capacity + 2, x, name[:5])
+            stdscr.addstr(base_y + 1, x, name[:5])
+
+    def _play_fireworks(self, stdscr):
+        """Show a short ASCII celebration after the puzzle is solved."""
+        height, width = stdscr.getmaxyx()
+        if height < 10 or width < 30:
+            return
+
+        rng = random.Random()
+        particles = []
+        chars = ["*", "+", "x", "."]
+        color_pairs = list(range(1, min(len(COLORS), 6) + 1))
+
+        for frame in range(28):
+            self._draw(stdscr)
+            message = "CONGRATULATIONS!"
+            submessage = f"Solved in {self.board.moves} moves"
+            msg_x = max(0, (width - len(message)) // 2)
+            sub_x = max(0, (width - len(submessage)) // 2)
+            stdscr.addstr(5, msg_x, message, curses.A_BOLD | curses.A_REVERSE)
+            stdscr.addstr(6, sub_x, submessage, curses.A_BOLD)
+
+            if frame % 5 == 0:
+                center_x = rng.randint(6, max(6, width - 7))
+                center_y = rng.randint(2, max(2, min(height - 6, 8)))
+                for dx, dy in (
+                    (-2, -1),
+                    (-1, -2),
+                    (0, -2),
+                    (1, -2),
+                    (2, -1),
+                    (-2, 0),
+                    (2, 0),
+                    (-2, 1),
+                    (-1, 2),
+                    (0, 2),
+                    (1, 2),
+                    (2, 1),
+                ):
+                    particles.append(
+                        {
+                            "x": center_x,
+                            "y": center_y,
+                            "dx": dx,
+                            "dy": dy,
+                            "age": 0,
+                            "char": rng.choice(chars),
+                            "color": rng.choice(color_pairs),
+                        }
+                    )
+
+            next_particles = []
+            for particle in particles:
+                x = particle["x"] + particle["dx"] * particle["age"]
+                y = particle["y"] + particle["dy"] * particle["age"] // 2
+                if 0 <= x < width - 1 and 0 <= y < height - 1 and particle["age"] < 6:
+                    attr = curses.A_BOLD
+                    if curses.has_colors():
+                        attr |= curses.color_pair(particle["color"])
+                    stdscr.addstr(y, x, particle["char"], attr)
+                    particle["age"] += 1
+                    next_particles.append(particle)
+            particles = next_particles
+
+            stdscr.refresh()
+            time.sleep(0.07)
